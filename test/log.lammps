@@ -1,0 +1,137 @@
+LAMMPS (29 Aug 2024 - Update 3)
+
+
+# ---------- Initialize Simulation ---------------------
+clear
+units       metal
+dimension   3
+boundary    p p p
+atom_style  atomic
+atom_modify sort 0 1
+
+
+# ---------- Create Atoms ---------------------
+read_data   conf.sw
+Reading data file ...
+  orthogonal box = (0 0 0) to (27.664 27.664 27.664)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  1000 atoms
+  read_data CPU = 0.063 seconds
+
+
+# ---------- Define Interatomic Potential ---------------------
+#pair_style   sw
+#pair_coeff   * * Si.sw Si
+
+pair_style  mlip mlip.ini
+pair_coeff  * *
+
+mass        1  29.0
+
+neighbor     2.0 bin
+neigh_modify delay 10 check yes
+
+# balance atoms per cpu
+comm_style tiled
+balance 1.1 rcb
+Balancing ...
+Neighbor list info ...
+  update: every = 1 steps, delay = 10 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7.7
+  ghost atom cutoff = 7.7
+  binsize = 3.85, bins = 8 8 8
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair mlip, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+
+# ---------- Define Settings ---------------------
+compute eng all pe/atom
+compute eatoms all reduce sum c_eng
+
+
+# ----------- OUTPUT
+dump 10  all custom 1 config.dmp id type x y z fx fy fz
+
+thermo 10
+thermo_style custom step pe fnorm lx ly lz press pxx pyy pzz c_eatoms
+
+
+# ----------- ARTn
+#displace_atoms	all random 0.05 0.05 0.05 1258475
+plugin   load   /home/oupc/artn-plugin/Files_LAMMPS/libartn-lmp.so
+Loading plugin: ARTn plugin fix style v1.0 by MAMMASMIAS Consortium (nsalles33@gmail.com, miha.gounde@gmail.com, matic.poberznik@ijs.si)
+plugin   list
+Currently loaded plugins
+   1: fix style plugin artn
+
+fix             10 all artn alpha0 0.2 dmax 5.0
+#fix             10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02
+timestep 0.001
+
+
+# ---------- Run Minimization ---------------------
+reset_timestep 0
+#fix 1 all box/relax iso 0.0 vmax 0.001
+
+min_style fire
+
+#min_modify: dmax or delaystep or dtgrow or dtshrink or alpha0 or alphahrink or...
+#            tmax or tmin or halfstepback or initialdelay or vdfmax or line or...
+#            norm or discrete_factor or integrator or tmax
+#            alpha_damp: does not work anymore
+
+
+minimize 1e-4 1e-5 2000 10000
+Switching to 'neigh_modify every 1 delay 0 check yes' setting during minimization
+  Parameters for fire:
+    dmax  delaystep dtgrow dtshrink alpha0 alphashrink tmax tmin   integrator   halfstepback   abcfire  
+     0.1     20      1.1     0.5     0.25     0.99      10  0.02 eulerimplicit      yes          no     
+ * FIX/ARTn::CHANGE PARAM...
+  Parameters for fire:
+    dmax  delaystep dtgrow dtshrink alpha0 alphashrink tmax tmin   integrator   halfstepback   abcfire  
+      5       5      1.1     0.5     0.2      0.99      10  0.02 eulerimplicit       no          no     
+ * alpha0 ->    0.2
+ * dt0 ->  0.001
+ * dtmin -> 2e-05
+ * dtmax -> 0.02
+ * ftm2v -> 9648.53
+ * dmax ->    5
+ * delaystep ->         5
+Per MPI rank memory allocation (min/avg/max) = 3.047 | 3.047 | 3.047 Mbytes
+   Step         PotEng         Fnorm            Lx             Ly             Lz           Press           Pxx            Pyy            Pzz          c_eatoms   
+         0  -635545.17      13.905194      27.664         27.664         27.664        -8547.9936     -12359.988     -4792.0241     -8491.9686     -635545.17    
+        10  -635545.17      42.506138      27.664         27.664         27.664        -8550.9512     -12374.128     -4782.1393     -8496.5868     -635545.17    
+        20  -635545.16      42.506138      27.664         27.664         27.664        -8548.0682     -12367.215     -4787.1628     -8489.8268     -635545.16    
+        30  -635545.17      42.506138      27.664         27.664         27.664        -8549.2327     -12364.032     -4785.8132     -8497.853      -635545.17    
+        40  -635545.21      13.823242      27.664         27.664         27.664        -8574.1349     -12400.738     -4811.6246     -8510.0421     -635545.21    
+        50  -635545.72      13.142384      27.664         27.664         27.664        -8815.8131     -12643.103     -5069.2723     -8735.0637     -635545.72    
+        60  -635548.32      42.506138      27.664         27.664         27.664        -10121.337     -13894.712     -6467.259      -10002.039     -635548.32    
+        70  -635548.33      9.3822958      27.664         27.664         27.664        -10137.359     -13919.979     -6494.1638     -9997.9339     -635548.33    
+        80  -635550.02      6.5681649      27.664         27.664         27.664        -11131.821     -14884.653     -7554.9372     -10955.874     -635550.02    
+        90  -635551.52      42.506138      27.664         27.664         27.664        -12478.381     -16202.576     -8963.486      -12269.08      -635551.52    
+       100  -635551.52      42.506138      27.664         27.664         27.664        -12479.413     -16198.241     -8969.1504     -12270.848     -635551.52    
+       110  -635551.56      3.7479138      27.664         27.664         27.664        -12538.507     -16272.214     -9055.2111     -12288.097     -635551.56    
+       120  -635552.25      2.7269843      27.664         27.664         27.664        -13012.614     -16786.167     -9513.3464     -12738.33      -635552.25    
+       130  -635552.89      42.506138      27.664         27.664         27.664        -13559.414     -17378.882     -10036.06      -13263.299     -635552.89    
+       140  -635552.89      300.56378      27.664         27.664         27.664        -13559.914     -17381.206     -10034.993     -13263.543     -635552.89    
+       150  -635552.91      1.7511754      27.664         27.664         27.664        -13579.94      -17387.84      -10067.978     -13284.001     -635552.91    
+       160  -635553.28      1.2717103      27.664         27.664         27.664        -13685.006     -17521.18      -10157.405     -13376.432     -635553.28    
+       170  -635553.51      30.056378      27.664         27.664         27.664        -13806.645     -17673.521     -10262.193     -13484.22      -635553.51    
+       180  -635553.47      0.94700959     27.664         27.664         27.664        -13824.214     -17648.698     -10293.633     -13530.311     -635553.47    
+       190  -635553.49      0.92502118     27.664         27.664         27.664        -13827.327     -17653.356     -10296.082     -13532.543     -635553.49    
+       200  -635553.49      42.506138      27.664         27.664         27.664        -13829.615     -17656.879     -10299.441     -13532.524     -635553.49    
+       210  -635553.49      42.506138      27.664         27.664         27.664        -13828.385     -17653.665     -10298.214     -13533.277     -635553.49    
+       220  -635553.48      42.506138      27.664         27.664         27.664        -13855.685     -17691.141     -10334.915     -13540.999     -635553.48    
+       230  -635553.48      42.506138      27.664         27.664         27.664        -13853.902     -17692.362     -10329.093     -13540.251     -635553.48    
+       240  -635553.48      42.506138      27.664         27.664         27.664        -13852.632     -17691.985     -10337.365     -13528.544     -635553.48    
+       250  -635553.47      42.506138      27.664         27.664         27.664        -13852.178     -17699.333     -10331.153     -13526.048     -635553.47    
+       260  -635553.48      0.93168649     27.664         27.664         27.664        -13852.905     -17710.646     -10331.543     -13516.527     -635553.48    
+       270  -635553.53      0.86907743     27.664         27.664         27.664        -13859.088     -17725.226     -10334.826     -13517.213     -635553.53    
+       280  -635553.81      0.55058831     27.664         27.664         27.664        -13871.922     -17816.566     -10330.29      -13468.911     -635553.81    
+       290  -635554.57      0.69250243     27.664         27.664         27.664        -13549.798     -17705.783     -9938.6053     -13005.007     -635554.57    
+       300  -635556.1       1.5841278      27.664         27.
