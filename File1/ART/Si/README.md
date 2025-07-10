@@ -1,0 +1,3 @@
+This repository contains amorphous silicon structures generated using the Activation Relaxation Technique Nouveau (ARTn) coupled with a machine learning (ML) potential. The link to the main paper will be provided once it becomes available.
+
+The ML potential is a moment tensor potential (MTP) -trained model at level 26, developed as part of our research on the "Unified Moment Tensor Potential for Si, SiO₂, and O systems." see paper at DOI: 10.1038/s41524-024-01390-8
