@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: file-generator
+Version: 0.1
+Summary: Python functions for generating files for ARTn-MLIP simulations of a-Si
+Author: Omar Uriel Pichardo Correa
+Author-email: g12_pichardo@ens.cnyn.unam.mx
+Requires-Python: >=3.6

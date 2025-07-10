@@ -1,0 +1,7 @@
+setup.py
+file_generator/__init__.py
+file_generator/files.py
+file_generator.egg-info/PKG-INFO
+file_generator.egg-info/SOURCES.txt
+file_generator.egg-info/dependency_links.txt
+file_generator.egg-info/top_level.txt
